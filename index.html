@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>インタラクティブDiv</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            flex-direction: column;
+        }
+        .container {
+            display: flex;
+            align-items: center;
+            gap: 13px; /* 10%増加 */
+        }
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 13px; /* 10%増加 */
+        }
+        .box {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: gray;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="column">
+            <div class="box" data-state="-">-</div>
+            <div class="box" data-state="-" data-row="2">-</div>
+        </div>
+        <div class="column">
+            <div class="box" data-state="-">-</div>
+            <div class="box" data-state="-" data-row="2">-</div>
+        </div>
+        <div class="column">
+            <div class="box" data-state="-">-</div>
+            <div class="box" data-state="-" data-row="2">-</div>
+        </div>
+        <div class="column">
+            <div class="box" data-state="-">-</div>
+            <div class="box" data-state="-" data-row="2">-</div>
+        </div>
+        <div class="column">
+            <div class="box" data-state="-">-</div>
+            <div class="box" data-state="-" data-row="2">-</div>
+        </div>
+        <div class="box" id="reset">R</div>
+    </div>
+    
+    <script>
+        const statesRow1 = ['-', '⚪︎', '×'];
+        const colorsRow1 = { '-': 'gray', '⚪︎': 'red', '×': 'blue' };
+        
+        const statesRow2 = ['-', '◎', '⚪︎', '△', '×'];
+        const colorsRow2 = { '-': 'gray', '◎': 'red', '⚪︎': 'pink', '△': 'green', '×': 'blue' };
+        
+        document.querySelectorAll('.box').forEach((box) => {
+            if (box.id !== 'reset') {
+                box.addEventListener('click', () => {
+                    let states = box.getAttribute('data-row') === '2' ? statesRow2 : statesRow1;
+                    let colors = box.getAttribute('data-row') === '2' ? colorsRow2 : colorsRow1;
+                    let currentState = box.getAttribute('data-state');
+                    let nextIndex = (states.indexOf(currentState) + 1) % states.length;
+                    let nextState = states[nextIndex];
+                    
+                    box.setAttribute('data-state', nextState);
+                    box.textContent = nextState;
+                    box.style.backgroundColor = colors[nextState];
+                    box.style.color = nextState === '⚪︎' && box.getAttribute('data-row') === '2' ? 'black' : 'white';
+                });
+            }
+        });
+
+        document.getElementById('reset').addEventListener('click', () => {
+            document.querySelectorAll('.box').forEach((box) => {
+                if (box.id !== 'reset') {
+                    box.setAttribute('data-state', '-');
+                    box.textContent = '-';
+                    box.style.backgroundColor = 'gray';
+                    box.style.color = 'white';
+                }
+            });
+        });
+        
+        // スリープ防止
+        let wakeLock = null;
+        const requestWakeLock = async () => {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+            } catch (err) {
+                console.error('Wake Lock request failed:', err);
+            }
+        };
+        
+        if ('wakeLock' in navigator) {
+            requestWakeLock();
+            document.addEventListener('visibilitychange', () => {
+                if (wakeLock !== null && document.visibilityState === 'visible') {
+                    requestWakeLock();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
+
+
